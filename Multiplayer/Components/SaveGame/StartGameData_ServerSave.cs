@@ -13,10 +13,12 @@ public class StartGameData_ServerSave : AStartGameData
     private SaveGameData saveGameData;
 
     private ClientboundSaveGameDataPacket packet;
+    private string serializedInventory;
 
     public void SetFromPacket(ClientboundSaveGameDataPacket packet)
     {
         this.packet = packet.Clone();
+        serializedInventory = packet.SerializedInventory;
 
         saveGameData = SaveGameManager.MakeEmptySave();
         saveGameData.SetString(SaveGameKeys.Game_mode, packet.GameMode);
@@ -61,6 +63,9 @@ public class StartGameData_ServerSave : AStartGameData
             LicenseManager.Instance.GrabAllGameModeSpecificUnlockables(SaveGameKeys.Game_mode);
         else
             StartingItemsController.Instance.AddStartingItems(saveGameData, true);
+
+        if (!string.IsNullOrEmpty(serializedInventory))
+            ClientboundSaveGameDataPacket.ApplyInventorySnapshot(serializedInventory);
 
         // if (packet.Debt_existing_locos != null)
         //     LocoDebtController.Instance.LoadExistingLocosDebtsSaveData(packet.Debt_existing_locos.Select(JObject.Parse).ToArray());
